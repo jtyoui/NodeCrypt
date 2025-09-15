@@ -4,7 +4,32 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // 处理WebSocket请求
+      // === ✅ 访问密码保护开始 ===
+      const protectedPaths = ['/'];
+      const isProtected = protectedPaths.some(path => url.pathname.startsWith(path));
+
+      if (isProtected) {
+          const authHeader = request.headers.get('Authorization');
+
+          if (!authHeader || !authHeader.startsWith('Basic ')) {
+              return new Response('🔒 需要身份验证', {
+                  status: 401,
+                  headers: {
+                      'WWW-Authenticate': 'Basic realm="Protected Area"',
+                  },
+              });
+          }
+
+          const encoded = authHeader.split(' ')[1];
+          const decoded = atob(encoded);
+          const [username, password] = decoded.split(':');
+          if (username!==env["USERNAME"] || password !== env["PASSWORD"]) {
+              return new Response('❌ 你没有权限，请联系管理员！', { status: 403 });
+          }
+      }
+      // === ✅ 访问密码保护结束 ===
+
+      // 处理WebSocket请求
     const upgradeHeader = request.headers.get('Upgrade');
     if (upgradeHeader && upgradeHeader === 'websocket') {
       const id = env.CHAT_ROOM.idFromName('chat-room');
@@ -25,16 +50,16 @@ export default {
 
 export class ChatRoom {  constructor(state, env) {
     this.state = state;
-    
+
     // Use objects like original server.js instead of Maps
     this.clients = {};
     this.channels = {};
-    
+
     this.config = {
       seenTimeout: 60000,
       debug: false
     };
-    
+
     // Initialize RSA key pair
     this.initRSAKeyPair();
   }
@@ -43,7 +68,6 @@ export class ChatRoom {  constructor(state, env) {
     try {
       let stored = await this.state.storage.get('rsaKeyPair');
       if (!stored) {
-        console.log('Generating new RSA keypair...');
           const keyPair = await crypto.subtle.generateKey(
           {
             name: 'RSASSA-PKCS1-v1_5',
@@ -60,21 +84,20 @@ export class ChatRoom {  constructor(state, env) {
           crypto.subtle.exportKey('spki', keyPair.publicKey),
           crypto.subtle.exportKey('pkcs8', keyPair.privateKey)
         ]);
-        
+
         stored = {
           rsaPublic: btoa(String.fromCharCode(...new Uint8Array(publicKeyBuffer))),
           rsaPrivateData: Array.from(new Uint8Array(privateKeyBuffer)),
           createdAt: Date.now() // 记录密钥创建时间，用于后续判断是否需要轮换
         };
-        
+
         await this.state.storage.put('rsaKeyPair', stored);
-        console.log('RSA key pair generated and stored');
       }
-      
+
       // Reconstruct the private key
       if (stored.rsaPrivateData) {
         const privateKeyBuffer = new Uint8Array(stored.rsaPrivateData);
-        
+
         stored.rsaPrivate = await crypto.subtle.importKey(
           'pkcs8',
           privateKeyBuffer,
@@ -86,12 +109,11 @@ export class ChatRoom {  constructor(state, env) {
           ['sign']
         );      }
         this.keyPair = stored;
-      
+
       // 检查密钥是否需要轮换（如果已创建超过24小时）
       if (stored.createdAt && (Date.now() - stored.createdAt > 24 * 60 * 60 * 1000)) {
         // 如果没有任何客户端，则执行密钥轮换
         if (Object.keys(this.clients).length === 0) {
-          console.log('密钥已使用24小时，进行轮换...');
           await this.state.storage.delete('rsaKeyPair');
           this.keyPair = null;
           await this.initRSAKeyPair();
@@ -101,7 +123,6 @@ export class ChatRoom {  constructor(state, env) {
         }
       }
     } catch (error) {
-      console.error('Error initializing RSA key pair:', error);
       throw error;
     }
   }
@@ -188,7 +209,7 @@ export class ChatRoom {  constructor(state, env) {
           );
 
           const publicKeyBuffer = await crypto.subtle.exportKey('raw', keys.publicKey);
-          
+
           // Sign the public key using PKCS1 padding (compatible with original)
           const signature = await crypto.subtle.sign(
             {
@@ -201,7 +222,7 @@ export class ChatRoom {  constructor(state, env) {
           // Convert hex string to Uint8Array for client public key
           const clientPublicKeyHex = message;
           const clientPublicKeyBytes = new Uint8Array(clientPublicKeyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-          
+
           // Import client's public key
           const clientPublicKey = await crypto.subtle.importKey(
             'raw',
@@ -223,9 +244,9 @@ export class ChatRoom {  constructor(state, env) {
           this.clients[clientId].shared = new Uint8Array(sharedSecretBits).slice(8, 40);
 
           const response = Array.from(new Uint8Array(publicKeyBuffer))
-            .map(b => b.toString(16).padStart(2, '0')).join('') + 
+            .map(b => b.toString(16).padStart(2, '0')).join('') +
             '|' + btoa(String.fromCharCode(...new Uint8Array(signature)));
-          
+
           this.sendMessage(connection, response);
 
         } catch (error) {
@@ -360,7 +381,7 @@ export class ChatRoom {  constructor(state, env) {
     if (!isObject(decrypted.p) || !this.clients[clientId].channel) {
       return;
     }
-    
+
     try {
       const channel = this.clients[clientId].channel;
       // 过滤有效的目标成员
@@ -440,7 +461,7 @@ export class ChatRoom {  constructor(state, env) {
       logEvent('closeConnection', error, 'error');
     }
   }
-  
+
   // 连接清理方法
   async cleanupOldConnections() {
     const seenThreshold = getTime() - this.config.seenTimeout;
@@ -462,18 +483,17 @@ export class ChatRoom {  constructor(state, env) {
       } catch (error) {
         logEvent('connection-seen', error, 'error');      }
     }
-    
+
     // 如果没有任何客户端和房间，检查是否需要轮换密钥
     if (Object.keys(this.clients).length === 0 && Object.keys(this.channels).length === 0) {
       const pendingRotation = await this.state.storage.get('pendingKeyRotation');
       if (pendingRotation) {
-        console.log('没有活跃客户端或房间，执行密钥轮换...');
         await this.state.storage.delete('rsaKeyPair');        await this.state.storage.delete('pendingKeyRotation');
         this.keyPair = null;
         await this.initRSAKeyPair();
       }
     }
-    
+
     return clientsToRemove.length; // 返回清理的连接数量
   }
 }

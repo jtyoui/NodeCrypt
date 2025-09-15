@@ -18,3 +18,7 @@ bindings = [
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ChatRoom"]
+
+[vars]
+USERNAME =  "chat"
+PASSWORD =  "chat"
