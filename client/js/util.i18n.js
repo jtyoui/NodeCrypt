@@ -16,9 +16,9 @@ const LANGUAGES = {
 			'meta.og_description': 'NodeCrypt is a zero-knowledge, end-to-end encrypted open source chat system where all encryption and decryption is done locally on the client side, and servers cannot access plaintext. Supports multi-platform deployment, secure, anonymous, no message history.',
 			'meta.twitter_title': 'NodeCrypt - End-to-End Encrypted Chat System',
 			'meta.twitter_description': 'NodeCrypt is a zero-knowledge, end-to-end encrypted open source chat system where all encryption and decryption is done locally on the client side, and servers cannot access plaintext.',
-			
+
 			// Login and main UI
-			'ui.enter_node': 'Enter a Node',
+			'ui.enter_node': 'Enter a Chat',
 			'ui.username': 'Username',
 			'ui.node_name': 'Node Name',
 			'ui.node_password': 'Node Password',
@@ -33,7 +33,7 @@ const LANGUAGES = {
 			'ui.me': ' (me)',
 			'ui.anonymous': 'Anonymous',
 			'ui.start_private_chat': 'Select for private chat',
-			
+
 			// Settings panel
 			'settings.title': 'Settings',
 			'settings.notification': 'Notification Settings',
@@ -44,7 +44,7 @@ const LANGUAGES = {
 			'settings.language_switch': 'Language',
 			'settings.chinese': 'Chinese',
 			'settings.english': 'English',
-			
+
 			// File upload and transfer
 			'file.selected_files': 'Selected Files',
 			'file.clear_all': 'Clear All',
@@ -60,7 +60,7 @@ const LANGUAGES = {
 			'file.drag_drop': 'Drag and drop files here',
 			'file.or': 'or',
 			'file.browse_files': 'browse files',
-			
+
 			// Notifications and messages
 			'notification.enabled': 'Notifications enabled',
 			'notification.alert_here': 'You will receive alerts here.',
@@ -68,7 +68,7 @@ const LANGUAGES = {
 			'notification.allow_browser': 'Please allow notifications in your browser settings.',
 			'notification.image': '[image]',
 			'notification.private': '(Private)',
-			
+
 			// Actions and menu
 			'action.share': 'Share',
 			'action.exit': 'Exit',
@@ -140,11 +140,11 @@ const LANGUAGES = {
 			'meta.og_description': 'NodeCrypt 是一个端到端加密的开源聊天系统，所有加密解密均在客户端本地完成，服务器无法获取明文。支持多平台部署，安全、匿名、无历史消息。',
 			'meta.twitter_title': 'NodeCrypt - 端到端加密聊天系统',
 			'meta.twitter_description': 'NodeCrypt 是一个端到端加密的开源聊天系统，所有加密解密均在客户端本地完成，服务器无法获取明文。',
-			
+
 			// Login and main UI
-			'ui.enter_node': '进入新的节点',
-			'ui.username': '用户名',
-			'ui.node_name': '节点名称',
+			'ui.enter_node': '进入公共聊天室',
+			'ui.username': '姓名',
+			'ui.node_name': '房间号',
 			'ui.node_password': '节点密码',
 			'ui.optional': '（可选）',
 			'ui.enter': '确定',
@@ -157,7 +157,7 @@ const LANGUAGES = {
 			'ui.me': '（我）',
 			'ui.anonymous': '匿名用户',
 			'ui.start_private_chat': '选择用户开始私信',
-			
+
 			// Settings panel
 			'settings.title': '设置',
 			'settings.notification': '通知设置',
@@ -168,12 +168,13 @@ const LANGUAGES = {
 			'settings.language_switch': '语言',
 			'settings.chinese': '中文',
 			'settings.english': 'English',
-			
+
 			// File upload and transfer
 			'file.selected_files': '已选择的文件',
 			'file.clear_all': '清空所有',
 			'file.cancel': '取消',
-			'file.send_files': '发送文件',			'file.sending': '发送中',
+			'file.send_files': '发送文件',
+            'file.sending': '发送中',
 			'file.receiving': '接收中',
 			'file.files': '个文件',
 			'file.total': '总计',
@@ -184,7 +185,7 @@ const LANGUAGES = {
 			'file.drag_drop': '拖拽文件到此处',
 			'file.or': '或',
 			'file.browse_files': '浏览文件',
-			
+
 			// Notifications and messages
 			'notification.enabled': '通知已启用',
 			'notification.alert_here': '您将在此处收到通知。',
@@ -192,7 +193,7 @@ const LANGUAGES = {
 			'notification.allow_browser': '请在浏览器设置中允许通知。',
 			'notification.image': '[图片]',
 			'notification.private': '（私信）',
-			
+
 			// Actions and menu
 			'action.share': '分享',
 			'action.exit': '退出',
@@ -216,7 +217,7 @@ const LANGUAGES = {
 			'system.private_message_failed': '无法发送私信给',
 			'system.private_file_failed': '无法发送私密文件给',
 			'system.user_not_connected': '用户可能未完全连接。',
-			
+
 			// Help page
 			'help.title': '使用说明',
 			'help.back_to_login': '返回登录',
@@ -258,7 +259,7 @@ const LANGUAGES = {
 
 // Current language
 // 当前语言
-let currentLanguage = 'en';
+let currentLanguage = 'zh';
 
 // Get translation for a key
 // 获取翻译文本
@@ -278,15 +279,15 @@ export function setLanguage(langCode) {
 		// Update document language attribute
 		// 更新文档语言属性
 		document.documentElement.lang = langCode;
-		
+
 		// Update static HTML texts
 		// 更新HTML中的静态文本
 		updateStaticTexts();
-		
+
 		// Dispatch language change event for other components to listen
 		// 派发语言变更事件供其他组件监听
-		window.dispatchEvent(new CustomEvent('languageChange', { 
-			detail: { language: langCode } 
+		window.dispatchEvent(new CustomEvent('languageChange', {
+			detail: { language: langCode }
 		}));
 	}
 }
@@ -324,17 +325,17 @@ export function initI18n(settings) {
 // 检测浏览器语言并返回支持的语言代码
 function detectBrowserLanguage() {
 	const navigatorLang = navigator.language || navigator.userLanguage || 'en';
-	
+
 	// Extract language code (e.g., 'zh-CN' -> 'zh', 'en-US' -> 'en')
 	const langCode = navigatorLang.split('-')[0].toLowerCase();
-	
+
 	// Check if we support this language
 	if (LANGUAGES[langCode]) {
 		return langCode;
 	}
-	
+
 	// Default fallback to English
-	return 'en';
+	return 'zh';
 }
 
 // Update static HTML text elements
@@ -345,7 +346,7 @@ export function updateStaticTexts() {
 		document.addEventListener('DOMContentLoaded', () => updateStaticTexts());
 		return;
 	}
-	
+
 	// Update login title
 	const loginTitle = document.getElementById('login-title');
 	if (loginTitle) {
@@ -358,7 +359,7 @@ export function updateStaticTexts() {
 		// 使用自定义事件触发表单重新生成，而不是动态导入
 		window.dispatchEvent(new CustomEvent('regenerateLoginForm'));
 	}
-	
+
 	// Update sidebar username label
 	const sidebarUsername = document.getElementById('sidebar-username');
 	if (sidebarUsername) {
@@ -371,31 +372,31 @@ export function updateStaticTexts() {
 	if (joinRoomText) {
 		joinRoomText.textContent = t('ui.enter_node', 'Enter a Node');
 	}
-	
+
 	// Update Members title in rightbar
 	const membersTitle = document.getElementById('members-title');
 	if (membersTitle) {
 		membersTitle.textContent = t('ui.members', 'Members');
 	}
-	
+
 	// Update settings title
 	const settingsTitle = document.getElementById('settings-title');
 	if (settingsTitle) {
 		settingsTitle.textContent = t('settings.title', 'Settings');
 	}
-	
+
 	// Update message placeholder
 	const messagePlaceholder = document.querySelector('.input-field-placeholder');
 	if (messagePlaceholder) {
 		messagePlaceholder.textContent = t('ui.message', 'Message');
 	}
-	
+
 	// Update attach button title
 	const attachBtn = document.querySelector('.chat-attach-btn');
 	if (attachBtn) {
 		attachBtn.title = t('file.attach_file', 'Attach file');
 	}
-	
+
 	// Update emoji button title
 	const emojiBtn = document.querySelector('.chat-emoji-btn');
 	if (emojiBtn) {
@@ -413,7 +414,7 @@ export function updateStaticTexts() {
 		backBtn.title = t('action.back', 'Back');
 		backBtn.setAttribute('aria-label', t('action.back', 'Back'));
 	}
-	
+
 	// Update all elements with data-i18n attribute
 	// 更新所有具有data-i18n属性的元素
 	const i18nElements = document.querySelectorAll('[data-i18n]');
@@ -423,7 +424,7 @@ export function updateStaticTexts() {
 			element.textContent = t(key, element.textContent || key);
 		}
 	});
-	
+
 	// Update all elements with data-i18n-title attribute
 	// 更新所有具有data-i18n-title属性的元素
 	const i18nTitleElements = document.querySelectorAll('[data-i18n-title]');
@@ -433,7 +434,7 @@ export function updateStaticTexts() {
 			element.title = t(key, element.title || key);
 		}
 	});
-	
+
 	// Update meta tags
 	// 更新meta标签
 	updateMetaTags();
@@ -447,31 +448,31 @@ function updateMetaTags() {
 	if (metaDescription) {
 		metaDescription.content = t('meta.description', metaDescription.content);
 	}
-	
+
 	// Update keywords meta tag
 	const metaKeywords = document.querySelector('meta[name="keywords"]');
 	if (metaKeywords) {
 		metaKeywords.content = t('meta.keywords', metaKeywords.content);
 	}
-	
+
 	// Update og:title meta tag
 	const metaOgTitle = document.querySelector('meta[property="og:title"]');
 	if (metaOgTitle) {
 		metaOgTitle.content = t('meta.og_title', metaOgTitle.content);
 	}
-	
+
 	// Update og:description meta tag
 	const metaOgDescription = document.querySelector('meta[property="og:description"]');
 	if (metaOgDescription) {
 		metaOgDescription.content = t('meta.og_description', metaOgDescription.content);
 	}
-	
+
 	// Update twitter:title meta tag
 	const metaTwitterTitle = document.querySelector('meta[name="twitter:title"]');
 	if (metaTwitterTitle) {
 		metaTwitterTitle.content = t('meta.twitter_title', metaTwitterTitle.content);
 	}
-	
+
 	// Update twitter:description meta tag
 	const metaTwitterDescription = document.querySelector('meta[name="twitter:description"]');
 	if (metaTwitterDescription) {

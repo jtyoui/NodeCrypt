@@ -31,37 +31,37 @@ window.addEventListener('languageChange', () => {
 // 语言切换时更新模态框文本
 function updateModalTexts() {
 	if (!uploadModal) return;
-	
+
 	// Update modal title
 	const modalTitle = uploadModal.querySelector('.file-upload-header h3');
 	if (modalTitle) {
 		modalTitle.textContent = t('file.upload_files', 'Upload Files');
 	}
-	
+
 	// Update file list title
 	const fileListTitle = uploadModal.querySelector('.file-list-title');
 	if (fileListTitle) {
 		fileListTitle.textContent = t('file.selected_files', 'Selected Files');
 	}
-	
+
 	// Update clear all button
 	const clearAllBtn = uploadModal.querySelector('.file-clear-all-btn');
 	if (clearAllBtn) {
 		clearAllBtn.textContent = t('file.clear_all', 'Clear All');
 	}
-	
+
 	// Update cancel button
 	const cancelBtn = uploadModal.querySelector('.file-upload-cancel-btn');
 	if (cancelBtn) {
 		cancelBtn.textContent = t('file.cancel', 'Cancel');
 	}
-	
+
 	// Update send files button
 	const sendBtn = uploadModal.querySelector('.file-upload-send-btn');
 	if (sendBtn) {
 		sendBtn.textContent = t('file.send_files', 'Send Files');
 	}
-	
+
 	// Update drag drop text
 	const dragDropText = uploadModal.querySelector('.file-drop-text');
 	if (dragDropText) {
@@ -69,14 +69,14 @@ function updateModalTexts() {
 			<p><strong>${t('file.drag_drop', 'Drag and drop files here')}</strong></p>
 			<p>${t('file.or', 'or')} <button class="file-browse-btn" type="button">${t('file.browse_files', 'browse files')}</button></p>
 		`;
-		
+
 		// Re-attach browse button event
 		const browseBtn = dragDropText.querySelector('.file-browse-btn');
 		if (browseBtn) {
 			on(browseBtn, 'click', handleBrowseClick);
 		}
 	}
-	
+
 	// Update summary if files are selected
 	if (selectedFiles.size > 0) {
 		updateFileListDisplay();
@@ -100,7 +100,8 @@ function createUploadModal() {
 				<h3>${t('file.upload_files', 'Upload Files')}</h3>
 				<button class="file-upload-close">&times;</button>
 			</div>
-			<div class="file-upload-content">				<div class="file-drop-zone" id="file-drop-zone">
+			<div class="file-upload-content">				
+			<div class="file-drop-zone" id="file-drop-zone">
 					<div class="file-drop-icon">📁</div>
 					<div class="file-drop-text">
 						<p><strong>${t('file.drag_drop', 'Drag and drop files here')}</strong></p>
@@ -136,12 +137,12 @@ export function showFileUploadModal(onSend) {
 
 	onSendCallback = onSend;
 	selectedFiles.clear();
-	
+
 	uploadModal = createUploadModal();
 	document.body.appendChild(uploadModal);
-	
+
 	setupModalEvents();
-	
+
 	// Focus and animation
 	setTimeout(() => {
 		addClass(uploadModal, 'show');
@@ -152,7 +153,7 @@ export function showFileUploadModal(onSend) {
 // 隐藏文件上传模态框
 function hideUploadModal() {
 	if (!uploadModal) return;
-	
+
 	removeClass(uploadModal, 'show');
 	setTimeout(() => {
 		if (uploadModal && uploadModal.parentNode) {
@@ -161,7 +162,7 @@ function hideUploadModal() {
 		uploadModal = null;
 		selectedFiles.clear();
 		onSendCallback = null;
-		
+
 		// 通知主模块重置拖拽标志位
 		window.dispatchEvent(new CustomEvent('fileUploadModalClosed'));
 	}, 300);
@@ -236,7 +237,7 @@ function handleDrop(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	removeClass(e.currentTarget, 'drag-over');
-	
+
 	const files = Array.from(e.dataTransfer.files);
 	addFiles(files);
 }
@@ -248,7 +249,7 @@ function addFiles(files) {
 		const fileId = generateFileId();
 		selectedFiles.set(fileId, file);
 	});
-	
+
 	updateFileList();
 	updateSendButton();
 }
@@ -290,7 +291,7 @@ function updateFileList() {
 
 	// Update file list
 	fileList.innerHTML = '';
-	
+
 	for (const [fileId, file] of selectedFiles) {
 		const fileItem = createElement('div', {
 			class: 'file-item',
@@ -302,9 +303,9 @@ function updateFileList() {
 			</div>
 			<button class="file-item-remove" type="button" data-file-id="${fileId}">&times;</button>
 		`);
-		
+
 		fileList.appendChild(fileItem);
-		
+
 		// Add remove event
 		const removeBtn = $('.file-item-remove', fileItem);
 		on(removeBtn, 'click', (e) => {
@@ -334,14 +335,14 @@ async function handleSendFiles() {
 	if (selectedFiles.size === 0 || !onSendCallback) return;
 
 	const files = Array.from(selectedFiles.values());
-	
+
 	try {
 		// Close modal first
 		hideUploadModal();
-		
+
 		// Send files through callback
 		await onSendCallback(files);
-		
+
 	} catch (error) {
 		console.error('Error sending files:', error);
 		if (window.addSystemMsg) {
@@ -354,7 +355,7 @@ async function handleSendFiles() {
 // 处理键盘事件
 on(document, 'keydown', (e) => {
 	if (!uploadModal) return;
-	
+
 	if (e.key === 'Escape') {
 		hideUploadModal();
 	}

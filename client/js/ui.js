@@ -133,17 +133,17 @@ function handleShareAction() {
 	const rd = roomsData[activeRoomIndex];
 	const roomName = rd.roomName.trim();
 	const password = rd.password || '';
-	
+
 	// Encrypt room name and password
 	const encryptedRoom = simpleEncrypt(roomName);
 	const encryptedPwd = password ? simpleEncrypt(password) : '';
-	
+
 	// Create share URL with encrypted data
 	let url = `${location.origin}${location.pathname}?r=${encodeURIComponent(encryptedRoom)}`;
 	if (encryptedPwd) {
 		url += `&p=${encodeURIComponent(encryptedPwd)}`;
 	}
-	
+
 	copyToClipboard(url, t('action.share_copied', 'Share link copied!'), t('action.copy_url_failed', 'Copy failed, url:'));
 }
 
@@ -418,7 +418,7 @@ export function loginFormHandler(modal) {
 		} else {
 			userName = document.getElementById('userName').value.trim();
 			roomName = document.getElementById('roomName').value.trim();
-			password = document.getElementById('password').value.trim();
+			password = "mza.YDX0rhf*qmv7hvy";
 			btn = document.querySelector('#login-form .login-btn');
 			roomInput = document.getElementById('roomName')
 		}
@@ -473,10 +473,6 @@ export function generateLoginForm(isModal = false) {
 			<input id="roomName${idPrefix}" type="text" required minlength="1" maxlength="15" placeholder="">
 			<label for="roomName${idPrefix}" class="floating-label">${t('ui.node_name', 'Node Name')}</label>
 		</div>
-		<div class="input-group">
-			<input id="password${idPrefix}" type="password" autocomplete="${isModal ? 'off' : 'current-password'}" minlength="1" maxlength="15" placeholder="">
-			<label for="password${idPrefix}" class="floating-label">${t('ui.node_password', 'Node Password')} <span class="optional">${t('ui.optional', '(optional)')}</span></label>
-		</div>
 		<button type="submit" class="login-btn">${t('ui.enter', 'ENTER')}</button>
 	`;
 }
@@ -509,19 +505,19 @@ export function setupTabs() {
 // 从 URL 自动填充房间和密码
 export function autofillRoomPwd(formPrefix = '') {
 	const params = new URLSearchParams(window.location.search);
-	
+
 	// Check for new encrypted format first
 	const encryptedRoom = params.get('r');
 	const encryptedPwd = params.get('p');
-	
+
 	// Check for old plaintext format (for backward compatibility)
 	const plaintextRoom = params.get('node');
 	const plaintextPwd = params.get('pwd');
-	
+
 	let roomValue = '';
 	let pwdValue = '';
 	let isPlaintext = false;
-	
+
 	if (encryptedRoom) {
 		// New encrypted format
 		roomValue = simpleDecrypt(decodeURIComponent(encryptedRoom));
@@ -535,7 +531,7 @@ export function autofillRoomPwd(formPrefix = '') {
 			pwdValue = decodeURIComponent(plaintextPwd);
 		}
 		isPlaintext = true;
-		
+
 		// Show security warning for plaintext URLs
 		if (window.addSystemMsg) {
 			window.addSystemMsg(t('system.security_warning', '⚠️ This link uses an old format. Room data is not encrypted.'), true);
@@ -555,7 +551,7 @@ export function autofillRoomPwd(formPrefix = '') {
 			pwdInput.value = pwdValue; // Will be empty string if no password
 			pwdInput.readOnly = true;
 			pwdInput.style.background = isPlaintext ? '#fff9e6' : '#f5f5f5'; // Yellow tint for plaintext
-			
+
 			// Add visual indicator for no password and keep label floating
 			if (!pwdValue) {
 				pwdInput.placeholder = 'No password required';
@@ -566,7 +562,7 @@ export function autofillRoomPwd(formPrefix = '') {
 			}
 		}
 	}
-	
+
 	// Clear URL parameters for security
 	if (roomValue || pwdValue) {
 		window.history.replaceState({}, '', location.pathname);
@@ -582,7 +578,7 @@ export function initLoginForm() {
 		// Only initialize if login form is empty
 		loginFormContainer.innerHTML = generateLoginForm(false);
 	}
-	
+
 	// 为登录页面添加class，用于手机适配
 	// Add class to login page for mobile adaptation
 	document.body.classList.add('login-page');
@@ -594,7 +590,7 @@ window.addEventListener('languageChange', () => {
 	// Refresh main header and user list
 	renderMainHeader();
 	renderUserList(false);
-	
+
 	// Refresh chat input placeholder
 	updateChatInputStyle();
 });
@@ -614,15 +610,15 @@ export function initFlipCard() {
 	const flipCard = document.getElementById('flip-card');
 	const helpBtn = document.getElementById('help-btn');
 	const backBtn = document.getElementById('back-btn');
-	
+
 	if (!flipCard || !helpBtn || !backBtn) return;
-	
+
 	const flipCardInner = flipCard.querySelector('.flip-card-inner');
 	if (!flipCardInner) return;
-	
+
 	// 翻转状态
 	let isFlipped = false;
-	
+
 	// 简单的翻转函数
 	function toggleFlip() {
 		isFlipped = !isFlipped;
@@ -632,14 +628,14 @@ export function initFlipCard() {
 			flipCardInner.classList.remove('flipped');
 		}
 	}
-	
+
 	// 帮助按钮点击事件
 	helpBtn.addEventListener('click', (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		toggleFlip();
 	});
-	
+
 	// 返回按钮点击事件
 	backBtn.addEventListener('click', (e) => {
 		e.preventDefault();
